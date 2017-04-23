@@ -22,6 +22,13 @@ public class GeneralForm {
         c.insets = standardInset;
 
         JButton clientsButton = new JButton("Клиенты");
+       /* clientsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new ClientsForm();
+            }
+        });
+*/
         JButton workersButton = new JButton("Работники");
         JButton ordersButton = new JButton("Заказы");
         JButton productsButton = new JButton("Изделия");
@@ -33,9 +40,16 @@ public class GeneralForm {
         mainPanel.add(productsButton,c);
         mainPanel.add(materialsButton,c);
 
-        if (main.activeManager.sudo) {
+        if (main.activeManager.getSudo()) {
             JLabel sudoLabel = new JLabel("Рут функции:");
+
             JButton managersButton = new JButton("Менеджеры");
+            managersButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    new ManagersForm();
+                }
+            });
 
             JButton ordersStatusesButton = new JButton("Статусы заказов");
             ordersStatusesButton.addActionListener(new ActionListener() {

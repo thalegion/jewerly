@@ -67,10 +67,7 @@ public class AuthForm {
 
 
                         while (loggedSet.next()) {
-                            main.activeManager = new Manager(
-                                    loggedSet.getInt("id"),
-                                    loggedSet.getString("login"),
-                                    loggedSet.getInt("sudo"));
+                            main.activeManager = new Manager(loggedSet);
 
                             startFrame.setVisible(false);
                             startFrame.dispose();

@@ -11,10 +11,6 @@ public class main {
     private static final String db_user = "root";
     private static final String db_password = "123";
 
-    /*public static Connection db_con;
-    public static PreparedStatement db_stmt;
-    public static ResultSet db_rs;
-*/
     public static DatabaseController db;
 
     public static Manager activeManager;
