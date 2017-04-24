@@ -6,6 +6,7 @@ import java.awt.event.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by User on 23.04.2017.
@@ -34,7 +35,7 @@ public class ClientsForm {
         ResultSet  modelSet = null;
         modelSet = main.db.select("*","clients","","id desc","");
 
-        ClientTableModel model = new ClientTableModel(modelSet);
+        model = new ClientTableModel(modelSet);
         model.addModelListener(new ModelUpdateListener() {
             @Override
             public void modelUpdated() {
@@ -48,29 +49,38 @@ public class ClientsForm {
         ButtonColumn editBtnColumn = new ButtonColumn(listTable, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                /*JTable table = (JTable)e.getSource();
                 int modelRow = Integer.valueOf( e.getActionCommand() );
 
-                //Manager mng = model.getClient(modelRow);
-                JDialog managerDialog = new JDialog(startFrame,"Редактирование пользователя", Dialog.ModalityType.APPLICATION_MODAL);
-                ManagerPanel managerPanel = new ManagerPanel(mng);
+                Client client = model.getClient(modelRow);
+                JDialog clientDialog = new JDialog(startFrame,"Редактирование пользователя", Dialog.ModalityType.APPLICATION_MODAL);
+                ClientPanel clientPanel = new ClientPanel(client);
 
-                managerDialog.setSize(600,400);
-                managerDialog.getContentPane().add(managerPanel);
-                managerDialog.setLocationRelativeTo(null);
+                clientDialog.setSize(600,400);
+                clientDialog.getContentPane().add(clientPanel);
+                clientDialog.setLocationRelativeTo(null);
 
-                managerDialog.setVisible(true);
+                clientDialog.setVisible(true);
 
-                if (managerPanel.isSaved()) {
-                    mng = managerPanel.getManager();
-                    if (main.db.update("managers",new String[] {"login","password","sudo"},new String[] {mng.getLogin(),mng.getPassword(),mng.getSudo() ? "1" : "0"},"id = ?",new String[] {String.valueOf(mng.getId())}) > 0)
-                        model.updateModel();
-                    else
+                if (clientPanel.isSaved()) {
+                    client = clientPanel.getClient();
+                    if (!client.save())
                         JOptionPane.showMessageDialog(startFrame,"Невозможно изменить данные пользователя.","Ошибка",JOptionPane.ERROR_MESSAGE);
 
-                }*/
+                    updateModel();
+                }
             }
-        },2);
+        },4);
+
+        if (main.activeManager.getSudo()) {
+            ButtonColumn deleteBtnColumn = new ButtonColumn(listTable, new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    JTable table = (JTable) e.getSource();
+                    int modelRow = Integer.valueOf(e.getActionCommand());
+                    ((ClientTableModel) table.getModel()).deleteValueAt(modelRow);
+                }
+            }, 5);
+        }
 
         JScrollPane scroll = new JScrollPane(listTable);
         startFrame.add(scroll, BorderLayout.CENTER);
@@ -78,8 +88,8 @@ public class ClientsForm {
         JPanel controlPanel = new JPanel();
         JPanel searchPanel = new JPanel();
 
-        nameSearchField = new JTextField("",30);
-        phoneSearchField = new JTextField("",30);
+        nameSearchField = new JTextField("",15);
+        phoneSearchField = new JTextField("",15);
 
         JButton addButton = new JButton("Добавить");
 
@@ -119,22 +129,21 @@ public class ClientsForm {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                JDialog managerDialog = new JDialog(startFrame,"Добавление пользователя", Dialog.ModalityType.APPLICATION_MODAL);
-                ManagerPanel managerPanel = new ManagerPanel();
+                JDialog clientDialog = new JDialog(startFrame,"Добавление клиента", Dialog.ModalityType.APPLICATION_MODAL);
+                ClientPanel clientPanel = new ClientPanel();
 
-                managerDialog.setSize(600,400);
-                managerDialog.getContentPane().add(managerPanel);
-                managerDialog.setLocationRelativeTo(null);
+                clientDialog.setSize(600,400);
+                clientDialog.getContentPane().add(clientPanel);
+                clientDialog.setLocationRelativeTo(null);
 
-                managerDialog.setVisible(true);
+                clientDialog.setVisible(true);
 
-                if (managerPanel.isSaved()) {
-                    Manager newManager = managerPanel.getManager();
-                    if (main.db.insert("managers","login,password,sudo",new String[] {newManager.getLogin(),newManager.getPassword(),newManager.getSudo() ? "1" : "0"}) > 0)
-                        model.updateModel();
+                if (clientPanel.isSaved()) {
+                    Client newClient = clientPanel.getClient();
+                    if (!newClient.save())
+                        JOptionPane.showMessageDialog(startFrame,"Невозможно добавить клиента.","Ошибка",JOptionPane.ERROR_MESSAGE);
                     else
-                        JOptionPane.showMessageDialog(startFrame,"Невозможно добавить пользователя.","Ошибка",JOptionPane.ERROR_MESSAGE);
-
+                        updateModel();
                 }
 
             }
@@ -229,8 +238,11 @@ class ClientTableModel extends AbstractTableModel {
             case 1:
                 return String.class;
             case 2:
-                return int.class;
+                return Date.class;
             case 3:
+                return int.class;
+            case 4:
+            case 5:
                 return JButton.class;
         }
 
@@ -238,7 +250,7 @@ class ClientTableModel extends AbstractTableModel {
     }
 
     public int getColumnCount() {
-        return 4;
+        return main.activeManager.getSudo() ? 6 : 5;
     }
 
     public String getColumnName(int columnIndex) {
@@ -248,6 +260,8 @@ class ClientTableModel extends AbstractTableModel {
             case 1:
                 return "Телефон";
             case 2:
+                return "Дата регистрации";
+            case 3:
                 return "Количество заказов";
         }
         return "";
@@ -267,15 +281,19 @@ class ClientTableModel extends AbstractTableModel {
             case 1:
                 return client.getPhone();
             case 2:
-                return client.getOrdersCount();
+                return client.getRegistration();
             case 3:
+                return client.getOrdersCount();
+            case 4:
                 return "Редактировать";
+            case 5:
+                return "Удалить";
         }
         return "";
     }
 
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        if (columnIndex == 3)
+        if (columnIndex == 4 || columnIndex == 5)
             return true;
         return false;
     }
@@ -285,6 +303,17 @@ class ClientTableModel extends AbstractTableModel {
 
     public Client getClient(int rowIndex) {
         return clients.get(rowIndex);
+    }
+
+    public void deleteValueAt (int rowIndex) {
+        if (JOptionPane.showConfirmDialog(null,"Вы уверены, что хотите удалить клиента? Удалятся также и все заказы.","Вы уверены?",JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            Client client = clients.get(rowIndex);
+            if (!client.delete())
+                JOptionPane.showMessageDialog(null,"Невозможно удалить клиента.","Ошибка", JOptionPane.ERROR_MESSAGE);
+
+            if (listener != null)
+                listener.modelUpdated();
+        }
     }
 
 }

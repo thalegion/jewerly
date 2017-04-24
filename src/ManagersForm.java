@@ -62,8 +62,8 @@ public class ManagersForm {
                     mng = managerPanel.getManager();
                     if (!mng.save())
                         JOptionPane.showMessageDialog(startFrame,"Невозможно изменить данные пользователя.","Ошибка",JOptionPane.ERROR_MESSAGE);
-                    else
-                        updateModel();
+
+                    updateModel();
                 }
             }
         },2);

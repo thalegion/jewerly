@@ -2,6 +2,7 @@ import javax.swing.tree.RowMapper;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * Created by User on 18.04.2017.
@@ -9,13 +10,14 @@ import java.util.List;
 public class DatabaseController implements AutoCloseable {
 
     private Connection connection;
-    private PreparedStatement statement;
-    private ResultSet rs;
+    private ArrayList<PreparedStatement> statements;
+    private ArrayList<ResultSet> rss;
 
     public DatabaseController(String url, String login, String password) {
         try {
             this.connection = DriverManager.getConnection(url, login, password);
-            this.rs = null;
+            this.statements = new ArrayList<PreparedStatement>();
+            this.rss = new ArrayList<ResultSet>();
         } catch (SQLException se) {
             se.printStackTrace();
         }
@@ -24,23 +26,24 @@ public class DatabaseController implements AutoCloseable {
 *  Select запрос к базе данных. Без экранирования, использовать осторожно
 */
     protected ResultSet select (String fields, String tableName, String where, String orderBy, String limitOffset) {
-        if (this.rs != null) {
-            try {this.rs.close();} catch (SQLException se) {se.printStackTrace();}
-        }
-        this.rs = null;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+
+        statements.add(stm);
+        rss.add(rs);
 
         try {
-            this.statement = this.connection.prepareStatement("SELECT " + fields + " FROM " + tableName +
+            stm = this.connection.prepareStatement("SELECT " + fields + " FROM " + tableName +
                     (where.length() > 0 ? " WHERE " + where : "") +
                     (orderBy.length() > 0 ? " ORDER BY " + orderBy : "") +
                     (limitOffset.length() > 0 ? " LIMIT " + limitOffset : ""));
 
-            this.rs = this.statement.executeQuery();
+
+            rs = stm.executeQuery();
         } catch (SQLException se) {
             se.printStackTrace();
         } finally {
-            //try {this.statement.close();} catch (SQLException se) {}
-            return this.rs;
+            return rs;
         }
     }
 
@@ -48,25 +51,25 @@ public class DatabaseController implements AutoCloseable {
 *  Select запрос к базе данных. С экранированием условия
 */
     protected ResultSet select (String fields, String tableName, String where, String[] whereValues, String orderBy, String limitOffset) {
-        if (this.rs != null) {
-            try {this.rs.close();} catch (SQLException se) {se.printStackTrace();}
-        }
-        this.rs = null;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+
+        statements.add(stm);
+        rss.add(rs);
 
         try {
-            this.statement = this.connection.prepareStatement("SELECT " + fields + " FROM " + tableName +
+            stm = this.connection.prepareStatement("SELECT " + fields + " FROM " + tableName +
                     (where.length() > 0 ? " WHERE " + where : "") +
                     (orderBy.length() > 0 ? " ORDER BY " + orderBy : "") +
                     (limitOffset.length() > 0 ? " LIMIT " + limitOffset : ""));
 
             for (int i = 1; i <= whereValues.length; i++)
-                this.statement.setString(i,whereValues[i-1]);
+                stm.setString(i,whereValues[i-1]);
 
-            rs = this.statement.executeQuery();
+            rs = stm.executeQuery();
         } catch (SQLException se) {
             se.printStackTrace();
         } finally {
-            //try {this.statement.close();} catch (SQLException se) {}
             return rs;
         }
     }
@@ -79,6 +82,8 @@ public class DatabaseController implements AutoCloseable {
         if (values.length == 0)
             return insertedId;
 
+        PreparedStatement stm = null;
+
         try {
             String preparedValues = "";
             for (String value : values) {
@@ -87,16 +92,16 @@ public class DatabaseController implements AutoCloseable {
             preparedValues = preparedValues.substring(0,preparedValues.length()-1);
 
 
-            this.statement = this.connection.prepareStatement("INSERT INTO " + tableName + " (" + fields + ") VALUES (" + preparedValues + ")");
+            stm = this.connection.prepareStatement("INSERT INTO " + tableName + " (" + fields + ") VALUES (" + preparedValues + ")");
             for (int i = 1; i <= values.length; i++) {
-                this.statement.setString(i,values[i-1]);
+                stm.setString(i,values[i-1]);
             }
 
-            insertedId = this.statement.executeUpdate();
+            insertedId = stm.executeUpdate();
         } catch (SQLException se) {
             se.printStackTrace();
         } finally {
-            try {this.statement.close();} catch (SQLException se) {se.printStackTrace();}
+            try {stm.close();} catch (SQLException se) {se.printStackTrace();}
             return insertedId;
         }
     }
@@ -108,6 +113,8 @@ public class DatabaseController implements AutoCloseable {
         int lastInsertedId = 0;
         if (values.size() == 0)
             return lastInsertedId;
+
+        PreparedStatement stm = null;
 
         try {
             String preparedValues = "";
@@ -122,19 +129,19 @@ public class DatabaseController implements AutoCloseable {
             preparedValues = preparedValues.substring(0,preparedValues.length()-1);
 
 
-            this.statement = this.connection.prepareStatement("INSERT INTO " + tableName + " (" + fields + ") VALUES " + preparedValues);
+            stm = this.connection.prepareStatement("INSERT INTO " + tableName + " (" + fields + ") VALUES " + preparedValues);
             int index = 1;
             for (String[] valueArray : values) {
                 for (String value : valueArray) {
-                    this.statement.setString(index++,value);
+                    stm.setString(index++,value);
                 }
             }
 
-            lastInsertedId = this.statement.executeUpdate();
+            lastInsertedId = stm.executeUpdate();
         } catch (SQLException se) {
             se.printStackTrace();
         } finally {
-            try {this.statement.close();} catch (SQLException se) {se.printStackTrace();}
+            try {stm.close();} catch (SQLException se) {se.printStackTrace();}
             return lastInsertedId;
         }
     }
@@ -147,6 +154,8 @@ public class DatabaseController implements AutoCloseable {
         if ((fields.length != values.length) || fields.length == 0)
             return updateId;
 
+        PreparedStatement stm = null;
+
         try {
             String setStatement = "";
             for (String field : fields) {
@@ -154,25 +163,25 @@ public class DatabaseController implements AutoCloseable {
             }
             setStatement = setStatement.substring(0,setStatement.length()-1);
 
-            this.statement = this.connection.prepareStatement("UPDATE " + tableName + " SET " + setStatement +
+            stm = this.connection.prepareStatement("UPDATE " + tableName + " SET " + setStatement +
                     (where.length() > 0 ? " WHERE " + where : ""));
 
             int escapeIndex = 1;
             for (String value : values) {
-                this.statement.setString(escapeIndex++,value);
+                stm.setString(escapeIndex++,value);
             }
 
             if (whereValues.length > 0) {
                 for (String value : whereValues) {
-                    this.statement.setString(escapeIndex++,value);
+                    stm.setString(escapeIndex++,value);
                 }
             }
 
-            updateId = this.statement.executeUpdate();
+            updateId = stm.executeUpdate();
         } catch (SQLException se) {
             se.printStackTrace();
         } finally {
-            try {this.statement.close();} catch (SQLException se) {}
+            try {stm.close();} catch (SQLException se) {}
             return updateId;
         }
     }
@@ -180,45 +189,83 @@ public class DatabaseController implements AutoCloseable {
     protected int delete (String tableName, String where, String[] whereValues) {
         int deletedId = 0;
 
+        PreparedStatement stm = null;
+
         try {
 
-            this.statement = this.connection.prepareStatement("DELETE FROM " + tableName +
+            stm = this.connection.prepareStatement("DELETE FROM " + tableName +
                     (where.length() > 0 ? " WHERE " + where : ""));
 
             int escapeIndex = 1;
 
             if (whereValues.length > 0) {
                 for (String value : whereValues) {
-                    this.statement.setString(escapeIndex++,value);
+                    stm.setString(escapeIndex++,value);
                 }
             }
 
-            deletedId = this.statement.executeUpdate();
+            deletedId = stm.executeUpdate();
         } catch (SQLException se) {
             se.printStackTrace();
         } finally {
-            try {this.statement.close();} catch (SQLException se) {}
+            try {stm.close();} catch (SQLException se) {}
             return deletedId;
         }
     }
 
     protected void closeStatementSet() {
         try{
-            if (this.statement != null) {
-                if (!this.statement.isClosed()) {
-                    try {this.statement.close();} catch (SQLException se) {se.printStackTrace();}
+            ArrayList<PreparedStatement> delStm = new ArrayList<PreparedStatement>();
+            for (PreparedStatement stm : statements) {
+                if (stm != null) {
+                    if (!stm.isClosed()) {
+                        try {stm.close();} catch (SQLException se) {se.printStackTrace();}
+                    }
                 }
+                delStm.add(stm);
             }
+            for (PreparedStatement dStm : delStm)
+                statements.remove(dStm);
 
-            if (this.rs != null) {
-                if (!this.rs.isClosed()) {
-                    try {this.rs.close();} catch (SQLException se) {se.printStackTrace();}
+            ArrayList<ResultSet> delRs = new ArrayList<ResultSet>();
+            for (ResultSet rs : rss) {
+                if (rs != null) {
+                    if (!rs.isClosed()) {
+                        try {rs.close();} catch (SQLException se) {se.printStackTrace();}
+                    }
+                }
+                delRs.add(rs);
+            }
+            for (ResultSet dRs : delRs)
+                rss.remove(dRs);
+
+        } catch (SQLException se) {
+            se.printStackTrace();
+        }
+    }
+
+    protected void closeStatementSet(ResultSet outRs) {
+        try{
+            for (int i = 0; i < rss.size(); i ++) {
+                if (rss.get(i) == outRs) {
+                    if (rss.get(i) != null) {
+                        if (!rss.get(i).isClosed()) {
+                            try {rss.get(i).close();} catch (SQLException se) {se.printStackTrace();}
+                        }
+                    }
+                    rss.remove(i);
+
+                    if (statements.get(i) != null) {
+                        if (!statements.get(i).isClosed()) {
+                            try {statements.get(i).close();} catch (SQLException se) {se.printStackTrace();}
+                        }
+                    }
+                    statements.remove(i);
                 }
             }
         } catch (SQLException se) {
             se.printStackTrace();
         }
-
     }
 
     @Override

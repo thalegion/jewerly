@@ -22,17 +22,31 @@ public class GeneralForm {
         c.insets = standardInset;
 
         JButton clientsButton = new JButton("Клиенты");
-       /* clientsButton.addActionListener(new ActionListener() {
+        clientsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new ClientsForm();
             }
         });
-*/
+
         JButton workersButton = new JButton("Работники");
+        workersButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new WorkersForm();
+            }
+        });
+
         JButton ordersButton = new JButton("Заказы");
         JButton productsButton = new JButton("Изделия");
+
         JButton materialsButton = new JButton("Материалы");
+        materialsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new MaterialsForm();
+            }
+        });
 
         mainPanel.add(clientsButton,c);
         mainPanel.add(workersButton,c);
@@ -75,6 +89,14 @@ public class GeneralForm {
                 }
             });
 
+            JButton paymentsStatusesButton = new JButton("Статусы оплаты");
+            paymentsStatusesButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    new ListAddForm("Статусы оплаты", "payment_statuses");
+                }
+            });
+
             c.insets = new Insets(15,0,5,0);
             mainPanel.add(sudoLabel,c);
 
@@ -83,6 +105,7 @@ public class GeneralForm {
             mainPanel.add(ordersStatusesButton,c);
             mainPanel.add(productsStatusesButton,c);
             mainPanel.add(productsTypesButton,c);
+            mainPanel.add(paymentsStatusesButton,c);
         }
 
         startFrame.add(mainPanel,BorderLayout.CENTER);
