@@ -203,7 +203,9 @@ class ClientTableModel extends AbstractTableModel {
 
         try {
             while (rs.next()) {
-                this.clients.add(new Client(rs));
+                Client cl = new Client(rs);
+                cl.fillOrders();
+                this.clients.add(cl);
             }
         } catch (SQLException se) {
             se.printStackTrace();
@@ -221,7 +223,10 @@ class ClientTableModel extends AbstractTableModel {
 
         try {
             while (rs.next()) {
-                this.clients.add(new Client(rs));
+                Client cl = new Client(rs);
+                cl.fillOrders();
+                this.clients.add(cl);
+
             }
         } catch (SQLException se) {
             se.printStackTrace();

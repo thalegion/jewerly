@@ -21,6 +21,27 @@ public class Client {
         this.registration = new Date();
         this.orders = new ArrayList<Order>();
     }
+
+    public Client(int id) {
+        try {
+            ResultSet rs = null;
+
+            rs = main.db.select("*","clients","id = ?",new String[] {String.valueOf(id)},"","1");
+            rs.next();
+
+            this.id = rs.getInt("id");
+            this.name = rs.getString("name");
+            this.phone = rs.getString("phone");
+            this.registration = new Date(rs.getLong("registration_date") * 1000);
+            this.orders = new ArrayList<Order>();
+
+            main.db.closeStatementSet(rs);
+
+        } catch (SQLException se) {
+            se.printStackTrace();
+        }
+    }
+
     public Client(ResultSet rs) {
         try {
             this.id = rs.getInt("id");
@@ -29,11 +50,6 @@ public class Client {
             this.registration = new Date(rs.getLong("registration_date") * 1000);
             this.orders = new ArrayList<Order>();
 
-            ResultSet ordersSet = main.db.select("*","orders","client_id = " + this.id,"date desc","");
-            while (ordersSet.next()) {
-                this.orders.add(new Order(ordersSet));
-            }
-            main.db.closeStatementSet(ordersSet);
         } catch (SQLException se) {
             se.printStackTrace();
         }
@@ -60,6 +76,21 @@ public class Client {
         this.phone = phone;
     }
     public void setRegistration(long unix) {this.registration = new Date(unix);}
+
+    public void fillOrders() {
+        ResultSet ordersSet = null;
+        try {
+            ordersSet = main.db.select("*", "orders", "client_id = " + this.id, "date desc", "");
+            while (ordersSet.next()) {
+                this.orders.add(new Order(ordersSet));
+            }
+        } catch (SQLException se) {
+            se.printStackTrace();
+        } finally {
+            main.db.closeStatementSet(ordersSet);
+        }
+
+    }
 
     public boolean save() {
         if (id == 0) {

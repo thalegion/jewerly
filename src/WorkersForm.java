@@ -111,7 +111,7 @@ public class WorkersForm {
                 String name = nameField.getText();
                 String phone = phoneField.getText();
                 nameField.setText("");
-                phoneField.setText("0");
+                phoneField.setText("");
                 if (name.length() > 0 && phone.length() > 0) {
                     Worker wrk = new Worker(name,phone);
                     model.insert(wrk);

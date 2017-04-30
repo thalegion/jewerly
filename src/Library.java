@@ -11,6 +11,23 @@ public class Library {
     private String name;
     private String tableName;
 
+    public  Library(int id, String tableName) {
+        ResultSet rs = null;
+
+        try{
+            rs = main.db.select("*",tableName,"id = ?",new String[] {String.valueOf(id)},"","1");
+            rs.next();
+
+            this.id = rs.getInt("id");
+            this.name = rs.getString("name");
+            this.tableName = tableName;
+
+            main.db.closeStatementSet(rs);
+        } catch (SQLException se) {
+            se.printStackTrace();
+        }
+    }
+
     public Library(ResultSet rs) {
         try {
             this.id = rs.getInt("id");

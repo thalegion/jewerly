@@ -16,6 +16,22 @@ public class Worker {
         this.phone = "";
     }
 
+    public Worker(int id) {
+        ResultSet rs = null;
+        try {
+            rs = main.db.select("*","workers","id = ?",new String[] {String.valueOf(id)},"","");
+            rs.next();
+
+            id = rs.getInt("id");
+            name = rs.getString("name");
+            phone = rs.getString("phone");
+        } catch (SQLException se) {
+            se.printStackTrace();
+        } finally {
+            main.db.closeStatementSet(rs);
+        }
+    }
+
     public Worker(String name, String phone) {
         this.id = 0;
         this.name = name;

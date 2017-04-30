@@ -1,8 +1,8 @@
 import javax.swing.*;
-import javax.swing.event.CellEditorListener;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
+import javax.swing.event.*;
 import javax.swing.table.*;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.awt.event.*;
@@ -15,6 +15,8 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by User on 16.04.2017.
@@ -65,23 +67,16 @@ public class MaterialsForm {
         JScrollPane scroll = new JScrollPane(listTable);
         startFrame.add(scroll,BorderLayout.CENTER);
 
-        DecimalFormat priceFormatter = new DecimalFormat("#.##");
-        priceFormatter.setGroupingUsed(false);
-        DecimalFormatSymbols decimalDelimeter = new DecimalFormatSymbols();
-        decimalDelimeter.setDecimalSeparator('.');
-        priceFormatter.setDecimalFormatSymbols(decimalDelimeter);
-
         JPanel controlPanel = new JPanel();
         JPanel searchPanel = new JPanel();
         JTextField nameField = new JTextField("",15);
-        JFormattedTextField priceField = new JFormattedTextField(priceFormatter);
-        priceField.setColumns(15);
+        JTextField priceField = new JTextField("",15);
+        priceField.getDocument().addDocumentListener(new PriceDocumentListener(priceField));
 
         searchField = new JTextField("",15);
         priceStartSearchField = new JTextField("",7);
         priceEndSearchField = new JTextField("",7);
         JButton addButton = new JButton("Добавить");
-
 
         searchField.addKeyListener(new KeyAdapter() {
             @Override
@@ -113,6 +108,7 @@ public class MaterialsForm {
                     updateModel();
             }
         });
+        priceStartSearchField.getDocument().addDocumentListener(new PriceDocumentListener(priceStartSearchField));
         priceEndSearchField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -128,12 +124,13 @@ public class MaterialsForm {
                     updateModel();
             }
         });
+        priceEndSearchField.getDocument().addDocumentListener(new PriceDocumentListener(priceEndSearchField));
 
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String name = nameField.getText();
-                Float price = priceField.getText().length() > 0 ? Float.valueOf(priceField.getText()) : 0f;
+                Double price = priceField.getText().length() > 0 ? Double.valueOf(priceField.getText()) : 0d;
                 nameField.setText("");
                 priceField.setText("0");
                 if (name.length() > 0 && price > 0f) {
@@ -241,7 +238,7 @@ class MaterialTableModel extends AbstractTableModel {
             case 1:
                 return String.class;
             case 2:
-                return Float.class;
+                return Double.class;
             case 3:
                 return JButton.class;
         }
@@ -303,7 +300,7 @@ class MaterialTableModel extends AbstractTableModel {
             if (columnIndex == 1)
                 lib.setName(value.toString());
             else if (columnIndex == 2)
-                lib.setPrice(Float.valueOf(value.toString()));
+                lib.setPrice(Double.valueOf(value.toString()));
 
             if (!lib.save())
                 JOptionPane.showMessageDialog(null,"Невозможно обновить значение.","Ошибка", JOptionPane.ERROR_MESSAGE);

@@ -8,15 +8,31 @@ public class Material {
 
     private int id;
     private String name;
-    private Float price;
+    private Double price;
 
     public Material() {
         this.id = 0;
         this.name = "";
-        this.price = 0f;
+        this.price = 0d;
     }
 
-    public Material(String name, Float price) {
+    public Material(int id) {
+        ResultSet rs = null;
+        try {
+            rs = main.db.select("*","materials","id = ?",new String[] {String.valueOf(id)},"","");
+            rs.next();
+
+            id = rs.getInt("id");
+            name = rs.getString("name");
+            price = rs.getDouble("price");
+        } catch (SQLException se) {
+            se.printStackTrace();
+        } finally {
+            main.db.closeStatementSet(rs);
+        }
+    }
+
+    public Material(String name, Double price) {
         this.id = 0;
         this.name = name;
         this.price = price;
@@ -26,7 +42,7 @@ public class Material {
         try {
             this.id = rs.getInt("id");
             this.name = rs.getString("name");
-            this.price = rs.getFloat("price");
+            this.price = rs.getDouble("price");
         } catch (SQLException se) {
             se.printStackTrace();
         }
@@ -38,14 +54,14 @@ public class Material {
     public String getName() {
         return name;
     }
-    public Float getPrice() {
+    public Double getPrice() {
         return price;
     }
 
     public void setName(String value) {
         name = value;
     }
-    public void setPrice(Float value) {
+    public void setPrice(Double value) {
         price = value;
     }
 

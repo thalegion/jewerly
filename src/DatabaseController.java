@@ -22,6 +22,33 @@ public class DatabaseController implements AutoCloseable {
             se.printStackTrace();
         }
     }
+
+    /*
+    * Запрос для кастомного SELECT
+    * */
+    protected ResultSet query (String query, String[] params) {
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+
+        statements.add(stm);
+        rss.add(rs);
+
+        try{
+            stm = this.connection.prepareStatement(query);
+
+            int paramKey = 1;
+            for(String p : params) {
+                stm.setString(paramKey++,p);
+            }
+
+            rs = stm.executeQuery();
+        } catch (SQLException se) {
+            se.printStackTrace();
+        } finally {
+            return rs;
+        }
+
+    }
 /*
 *  Select запрос к базе данных. Без экранирования, использовать осторожно
 */

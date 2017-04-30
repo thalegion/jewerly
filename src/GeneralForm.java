@@ -38,7 +38,20 @@ public class GeneralForm {
         });
 
         JButton ordersButton = new JButton("Заказы");
+        ordersButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new OrdersForm();
+            }
+        });
+
         JButton productsButton = new JButton("Изделия");
+        productsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new ProductsForm();
+            }
+        });
 
         JButton materialsButton = new JButton("Материалы");
         materialsButton.addActionListener(new ActionListener() {
