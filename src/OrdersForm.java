@@ -60,37 +60,23 @@ public class OrdersForm {
         ButtonColumn editBtnColumn = new ButtonColumn(listTable, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                /*int modelRow = Integer.valueOf( e.getActionCommand() );
+            int modelRow = Integer.valueOf( e.getActionCommand() );
 
-                Client client = model.getClient(modelRow);
-                JDialog clientDialog = new JDialog(startFrame,"Редактирование пользователя", Dialog.ModalityType.APPLICATION_MODAL);
-                ClientPanel clientPanel = new ClientPanel(client);
+            Order order = model.getOrder(modelRow);
+            editOrder(order);
 
-                clientDialog.setSize(600,400);
-                clientDialog.getContentPane().add(clientPanel);
-                clientDialog.setLocationRelativeTo(null);
-
-                clientDialog.setVisible(true);
-
-                if (clientPanel.isSaved()) {
-                    client = clientPanel.getClient();
-                    if (!client.save())
-                        JOptionPane.showMessageDialog(startFrame,"Невозможно изменить данные пользователя.","Ошибка",JOptionPane.ERROR_MESSAGE);
-
-                    updateModel();
-                }*/
             }
-        },5);
+        },6);
 
         if (main.activeManager.getSudo()) {
             ButtonColumn deleteBtnColumn = new ButtonColumn(listTable, new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    JTable table = (JTable) e.getSource();
-                    int modelRow = Integer.valueOf(e.getActionCommand());
-                    ((OrderTableModel) table.getModel()).deleteValueAt(modelRow);
+                JTable table = (JTable) e.getSource();
+                int modelRow = Integer.valueOf(e.getActionCommand());
+                ((OrderTableModel) table.getModel()).deleteValueAt(modelRow);
                 }
-            }, 6);
+            }, 7);
         }
 
         JScrollPane scroll = new JScrollPane(listTable);
@@ -219,7 +205,7 @@ public class OrdersForm {
                         JOptionPane.showMessageDialog(startFrame,"Невозможно добавить заказ.","Ошибка",JOptionPane.ERROR_MESSAGE);
                     else {
                         updateModel();
-                        //openEdit()
+                        editOrder(newOrder);
                     }
                 }
             }
@@ -249,6 +235,32 @@ public class OrdersForm {
         startFrame.add(controlPanel,BorderLayout.SOUTH);
 
         startFrame.setVisible(true);
+    }
+
+    private boolean editOrder(Order o) {
+        JDialog orderDialog = new JDialog(startFrame,"Редактирование заказа", Dialog.ModalityType.APPLICATION_MODAL);
+        OrderPanel orderPanel = new OrderPanel(o);
+
+        orderDialog.setSize(600,400);
+        orderDialog.getContentPane().add(orderPanel);
+        orderDialog.pack();
+        orderDialog.setLocationRelativeTo(null);
+
+
+        orderDialog.setVisible(true);
+
+        if (orderPanel.isSaved()) {
+            o = orderPanel.getOrder();
+            Boolean res = o.save();
+            if (!res)
+                JOptionPane.showMessageDialog(startFrame,"Невозможно изменить данные заказа.","Ошибка",JOptionPane.ERROR_MESSAGE);
+
+            updateModel();
+
+            return res;
+        }
+
+        return false;
     }
 
     private void updateModel() {
@@ -328,6 +340,10 @@ class OrderTableModel extends AbstractTableModel {
     private ModelUpdateListener listener;
 
 
+    public OrderTableModel(ArrayList<Order> o) {
+        orders = o;
+    }
+
     public OrderTableModel(ResultSet rs) {
         orders = new ArrayList<Order>();
 
@@ -344,6 +360,12 @@ class OrderTableModel extends AbstractTableModel {
 
     public void addModelListener(ModelUpdateListener listener) {
         this.listener = listener;
+    }
+
+    public void update(ArrayList<Order> o) {
+        orders = o;
+
+        fireTableDataChanged();
     }
 
     public void update(ResultSet rs) {
@@ -373,7 +395,9 @@ class OrderTableModel extends AbstractTableModel {
             case 2:
                 return Date.class;
             case 5:
+                return Double.class;
             case 6:
+            case 7:
                 return JButton.class;
         }
 
@@ -381,7 +405,7 @@ class OrderTableModel extends AbstractTableModel {
     }
 
     public int getColumnCount() {
-        return main.activeManager.getSudo() ? 7 : 6;
+        return main.activeManager.getSudo() ? 8 : 7;
     }
 
     public String getColumnName(int columnIndex) {
@@ -396,6 +420,8 @@ class OrderTableModel extends AbstractTableModel {
                 return "Статус заказа";
             case 4:
                 return "Статус оплаты";
+            case 5:
+                return "Цена";
         }
         return "";
     }
@@ -420,15 +446,17 @@ class OrderTableModel extends AbstractTableModel {
             case 4:
                 return order.getPaymentStatus().getName();
             case 5:
-                return "Редактировать";
+                return order.getPrice();
             case 6:
+                return "Редактировать";
+            case 7:
                 return "Удалить";
         }
         return "";
     }
 
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        if (columnIndex == 5 || columnIndex == 6)
+        if (columnIndex == 6 || columnIndex == 7)
             return true;
         return false;
     }

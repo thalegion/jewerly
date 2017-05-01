@@ -11,9 +11,9 @@ public class GeneralForm {
 
         JFrame startFrame = new JFrame("Главная | Ювелирный магазин");
         startFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        startFrame.setLocationRelativeTo(null);
 
         startFrame.setSize(600,400);
+        startFrame.setLocationRelativeTo(null);
 
         JPanel mainPanel = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();

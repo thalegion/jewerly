@@ -22,7 +22,7 @@ public class Material {
             rs = main.db.select("*","materials","id = ?",new String[] {String.valueOf(id)},"","");
             rs.next();
 
-            id = rs.getInt("id");
+            this.id = rs.getInt("id");
             name = rs.getString("name");
             price = rs.getDouble("price");
         } catch (SQLException se) {

@@ -35,9 +35,10 @@ public class WorkersForm {
 
         startFrame = new JFrame("Работники | Ювелирный магазин");
         startFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        startFrame.setLocationRelativeTo(null);
+
 
         startFrame.setSize(600,400);
+        startFrame.setLocationRelativeTo(null);
 
         ResultSet modelSet = main.db.select("*","workers","","","");
 
@@ -59,7 +60,7 @@ public class WorkersForm {
                 int modelRow = Integer.valueOf( e.getActionCommand() );
                 ((WorkerTableModel)table.getModel()).deleteValueAt(modelRow);
             }
-        },2);
+        },3);
 
         JScrollPane scroll = new JScrollPane(listTable);
         startFrame.add(scroll,BorderLayout.CENTER);
@@ -126,7 +127,7 @@ public class WorkersForm {
         controlPanel.add(phoneField);
         controlPanel.add(addButton);
 
-        searchPanel.add(new JLabel("Наименование:"));
+        searchPanel.add(new JLabel("ФИО:"));
         searchPanel.add(searchField);
         searchPanel.add(new JLabel("Телефон:"));
         searchPanel.add(phoneSearchField);
@@ -175,7 +176,9 @@ class WorkerTableModel extends AbstractTableModel {
 
         try {
             while (rs.next()) {
-                this.libraries.add(new Worker(rs));
+                Worker w = new Worker(rs);
+                w.fillProducts();
+                this.libraries.add(w);
             }
         } catch (SQLException se) {
             se.printStackTrace();
@@ -193,7 +196,9 @@ class WorkerTableModel extends AbstractTableModel {
 
         try {
             while (rs.next()) {
-                this.libraries.add(new Worker(rs));
+                Worker w = new Worker(rs);
+                w.fillProducts();
+                this.libraries.add(w);
             }
         } catch (SQLException se) {
             se.printStackTrace();
@@ -211,6 +216,8 @@ class WorkerTableModel extends AbstractTableModel {
             case 1:
                 return String.class;
             case 2:
+                return Integer.class;
+            case 3:
                 return JButton.class;
         }
 
@@ -218,7 +225,7 @@ class WorkerTableModel extends AbstractTableModel {
     }
 
     public int getColumnCount() {
-        return 3;
+        return 4;
     }
 
     public String getColumnName(int columnIndex) {
@@ -228,6 +235,8 @@ class WorkerTableModel extends AbstractTableModel {
             case 1:
                 return "Телефон";
             case 2:
+                return "Количество изделий";
+            case 3:
                 return "";
         }
         return "";
@@ -247,17 +256,21 @@ class WorkerTableModel extends AbstractTableModel {
             case 1:
                 return lib.getPhone();
             case 2:
+                return lib.getProductsCount();
+            case 3:
                 return "Удалить";
         }
         return "";
     }
 
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return true;
+        if (columnIndex != 2)
+            return true;
+        return false;
     }
 
     public void setValueAt(Object value, int rowIndex, int columnIndex) {
-        if (columnIndex == 2)
+        if (columnIndex == 3 )
             return;
         if (JOptionPane.showConfirmDialog(null,"Вы уверены, что хотите изменить значение?","Вы уверены?",JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             Worker lib = libraries.get(rowIndex);

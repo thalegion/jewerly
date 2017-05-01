@@ -67,7 +67,9 @@ public class ProductsForm {
 
             productDialog.setSize(600,400);
             productDialog.getContentPane().add(productPanel);
+            productDialog.pack();
             productDialog.setLocationRelativeTo(null);
+
 
             productDialog.setVisible(true);
 
@@ -177,10 +179,10 @@ public class ProductsForm {
         searchPanel.add(new JLabel("Описание:"));
         searchPanel.add(descriptionSearchField);
 
-        searchPanel.add(new JLabel("Тип заказа:"));
+        searchPanel.add(new JLabel("Тип изделия:"));
         searchPanel.add(typeSearchField);
 
-        searchPanel.add(new JLabel("Статус заказа:"));
+        searchPanel.add(new JLabel("Статус изделия:"));
         searchPanel.add(statusSearchField);
 
         startFrame.add(searchPanel,BorderLayout.NORTH);
@@ -241,6 +243,9 @@ class ProductTableModel extends AbstractTableModel {
     private ArrayList<Product> products;
     private ModelUpdateListener listener;
 
+    public ProductTableModel(ArrayList<Product> p) {
+        products = p;
+    }
 
     public ProductTableModel(ResultSet rs) {
         products = new ArrayList<Product>();
@@ -258,6 +263,12 @@ class ProductTableModel extends AbstractTableModel {
 
     public void addModelListener(ModelUpdateListener listener) {
         this.listener = listener;
+    }
+
+    public void update(ArrayList<Product> p) {
+        products = p;
+
+        fireTableDataChanged();
     }
 
     public void update(ResultSet rs) {

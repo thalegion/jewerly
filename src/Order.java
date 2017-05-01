@@ -74,6 +74,8 @@ public class Order {
     public Library getPaymentStatus() {
         return payment_status;
     }
+    public Double getPrice() {return price;}
+    public ArrayList<Product> getProducts() {return products;}
 
     public void setClient(Client client) {
         this.client = client;
@@ -85,6 +87,7 @@ public class Order {
         this.payment_status = status;
     }
     public void setDate(long unix) {this.date = new Date(unix);}
+    public void setPrice(Double price) {this.price = price;}
 
     public void fillProducts() {
         products.clear();

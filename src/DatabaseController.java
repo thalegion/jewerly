@@ -119,12 +119,19 @@ public class DatabaseController implements AutoCloseable {
             preparedValues = preparedValues.substring(0,preparedValues.length()-1);
 
 
-            stm = this.connection.prepareStatement("INSERT INTO " + tableName + " (" + fields + ") VALUES (" + preparedValues + ")");
+            stm = this.connection.prepareStatement("INSERT INTO " + tableName + " (" + fields + ") VALUES (" + preparedValues + ")",Statement.RETURN_GENERATED_KEYS);
             for (int i = 1; i <= values.length; i++) {
                 stm.setString(i,values[i-1]);
             }
 
             insertedId = stm.executeUpdate();
+            if (insertedId > 0) {
+                try (ResultSet generatedKeys = stm.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        insertedId = generatedKeys.getInt(1);
+                    }
+                }
+            }
         } catch (SQLException se) {
             se.printStackTrace();
         } finally {

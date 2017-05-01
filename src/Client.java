@@ -68,6 +68,7 @@ public class Client {
     public int getOrdersCount(){
         return orders.size();
     }
+    public ArrayList<Order> getOrders() {return orders;}
 
     public void setName(String name) {
         this.name = name;
@@ -77,7 +78,10 @@ public class Client {
     }
     public void setRegistration(long unix) {this.registration = new Date(unix);}
 
+
     public void fillOrders() {
+        orders.clear();
+
         ResultSet ordersSet = null;
         try {
             ordersSet = main.db.select("*", "orders", "client_id = " + this.id, "date desc", "");

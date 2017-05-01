@@ -11,6 +11,12 @@ public class ProductMaterial {
     private Material material;
     private int count;
 
+    public ProductMaterial(Product p, Material m, int count) {
+        product = p;
+        material = m;
+        this.count = count;
+    }
+
     public ProductMaterial(ResultSet rs) {
         try {
           id = rs.getInt("id");

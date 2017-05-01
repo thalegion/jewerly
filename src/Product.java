@@ -14,7 +14,28 @@ public class Product {
     private Library type;
     private Order order;
     private ArrayList<ProductMaterial> materials;
-    private ArrayList<Worker> workers;
+    private ArrayList<ProductWorker> workers;
+
+    public Product(Order o) {
+        price = 0d;
+        order = o;
+
+        ResultSet libSet = null;
+        try {
+            libSet = main.db.select("*","products_statuses","","","1");
+            libSet.next();
+            status = new Library(libSet);
+
+            libSet = main.db.select("*","products_types","","","1");
+            libSet.next();
+            type = new Library(libSet);
+        } catch (SQLException se) {
+            se.printStackTrace();
+        }
+
+        materials = new ArrayList<ProductMaterial>();
+        workers = new ArrayList<ProductWorker>();
+    }
 
     public Product(int id) {
         ResultSet rs = null;
@@ -22,7 +43,7 @@ public class Product {
             rs = main.db.select("*","products","id = ?",new String[] {String.valueOf(id)},"","");
             rs.next();
 
-            id = rs.getInt("id");
+            this.id = rs.getInt("id");
             price = rs.getDouble("price");
             status = new Library(rs.getInt("status"),"products_statuses");
             type = new Library(rs.getInt("type"),"products_types");
@@ -30,7 +51,7 @@ public class Product {
             order = new Order(rs.getInt("order_id"));
 
             materials = new ArrayList<ProductMaterial>();
-            workers = new ArrayList<Worker>();
+            workers = new ArrayList<ProductWorker>();
         } catch (SQLException se) {
             se.printStackTrace();
         } finally {
@@ -48,7 +69,7 @@ public class Product {
           order = new Order(rs.getInt("order_id"));
 
           materials = new ArrayList<ProductMaterial>();
-          workers = new ArrayList<Worker>();
+          workers = new ArrayList<ProductWorker>();
         } catch (SQLException se) {
             se.printStackTrace();
         }
@@ -73,6 +94,7 @@ public class Product {
         return order;
     }
     public ArrayList<ProductMaterial> getMaterials() {return materials;}
+    public ArrayList<ProductWorker> getWorkers() {return workers;}
 
     public void setType(Library type) {
         this.type = type;
@@ -102,6 +124,14 @@ public class Product {
         }
     }
 
+    public String getMaterialsSplitIds() {
+        String ids = "";
+        for (ProductMaterial pm : materials)
+            ids += String.valueOf(pm.getMaterial().getId())+',';
+
+        return (ids.length() > 0 ? ids.substring(0,ids.length() - 1) : "");
+    }
+
     public void fillWorkers() {
         workers.clear();
 
@@ -109,12 +139,20 @@ public class Product {
         try {
             fillSet = main.db.select("*","products_workers","product_id = " + id,"","");
             while (fillSet.next())
-                workers.add(new Worker(fillSet.getInt("worker_id")));
+                workers.add(new ProductWorker(fillSet));
         } catch (SQLException se) {
             se.printStackTrace();
         } finally {
             main.db.closeStatementSet(fillSet);
         }
+    }
+
+    public String getWorkersSplitIds() {
+        String ids = "";
+        for (ProductWorker pm : workers)
+            ids += String.valueOf(pm.getWorker().getId())+',';
+
+        return (ids.length() > 0 ? ids.substring(0,ids.length() - 1) : "");
     }
 
     public boolean save() {

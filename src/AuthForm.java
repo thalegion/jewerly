@@ -17,12 +17,9 @@ public class AuthForm {
 
         JFrame startFrame = new JFrame("Вход | Ювелирный магазин");
         startFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        startFrame.setLocationRelativeTo(null);
 
-        //Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-
-        //startFrame.setSize((int)screenSize.getWidth(),(int)screenSize.getHeight());
         startFrame.setSize(600,400);
+        startFrame.setLocationRelativeTo(null);
 
         JPanel loginPanel = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();

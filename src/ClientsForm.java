@@ -28,9 +28,10 @@ public class ClientsForm {
 
         startFrame = new JFrame("Клиенты | Ювелирный магазин");
         startFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        startFrame.setLocationRelativeTo(null);
+
 
         startFrame.setSize(600,400);
+        startFrame.setLocationRelativeTo(null);
 
         ResultSet  modelSet = null;
         modelSet = main.db.select("*","clients","","id desc","");
@@ -57,6 +58,7 @@ public class ClientsForm {
 
                 clientDialog.setSize(600,400);
                 clientDialog.getContentPane().add(clientPanel);
+                clientDialog.pack();
                 clientDialog.setLocationRelativeTo(null);
 
                 clientDialog.setVisible(true);

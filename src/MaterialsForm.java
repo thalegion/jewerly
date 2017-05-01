@@ -38,9 +38,10 @@ public class MaterialsForm {
 
         startFrame = new JFrame("Материалы | Ювелирный магазин");
         startFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        startFrame.setLocationRelativeTo(null);
+
 
         startFrame.setSize(600,400);
+        startFrame.setLocationRelativeTo(null);
 
         ResultSet modelSet = main.db.select("*","materials","","","");
 
