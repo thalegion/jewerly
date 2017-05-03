@@ -1,11 +1,14 @@
 import com.sun.org.apache.xpath.internal.operations.Bool;
 import javafx.scene.control.DatePicker;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -41,6 +44,12 @@ public class ProductsForm {
 
         startFrame.setSize(1200,400);
         startFrame.setLocationRelativeTo(null);
+
+        try {
+            startFrame.setIconImage(ImageIO.read(new File("out/production/jewerly/images/diamond_ico.jpg")));
+        } catch (IOException ie) {
+            ie.printStackTrace();
+        }
 
         ResultSet  modelSet = null;
         modelSet = main.db.select("*","products","","id desc","");

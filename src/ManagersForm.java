@@ -1,8 +1,11 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -30,6 +33,12 @@ public class ManagersForm {
 
         startFrame.setSize(600,400);
         startFrame.setLocationRelativeTo(null);
+
+        try {
+            startFrame.setIconImage(ImageIO.read(new File("out/production/jewerly/images/diamond_ico.jpg")));
+        } catch (IOException ie) {
+            ie.printStackTrace();
+        }
 
         ResultSet modelSet = main.db.select("*","managers","id != " + main.activeManager.getId(),"","");
 

@@ -1,7 +1,10 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.DriverManager;
@@ -17,6 +20,11 @@ public class AuthForm {
 
         JFrame startFrame = new JFrame("Вход | Ювелирный магазин");
         startFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        try {
+            startFrame.setIconImage(ImageIO.read(new File("out/production/jewerly/images/diamond_ico.jpg")));
+        } catch (IOException ie) {
+            ie.printStackTrace();
+        }
 
         startFrame.setSize(600,400);
         startFrame.setLocationRelativeTo(null);

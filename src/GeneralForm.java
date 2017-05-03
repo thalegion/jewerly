@@ -1,7 +1,10 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by User on 16.04.2017.
@@ -14,6 +17,12 @@ public class GeneralForm {
 
         startFrame.setSize(600,400);
         startFrame.setLocationRelativeTo(null);
+
+        try {
+            startFrame.setIconImage(ImageIO.read(new File("out/production/jewerly/images/diamond_ico.jpg")));
+        } catch (IOException ie) {
+            ie.printStackTrace();
+        }
 
         JPanel mainPanel = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();

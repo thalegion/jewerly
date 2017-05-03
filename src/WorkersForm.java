@@ -1,3 +1,4 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.TableModelEvent;
@@ -6,6 +7,8 @@ import javax.swing.table.*;
 import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -39,6 +42,12 @@ public class WorkersForm {
 
         startFrame.setSize(600,400);
         startFrame.setLocationRelativeTo(null);
+        try {
+            startFrame.setIconImage(ImageIO.read(new File("out/production/jewerly/images/diamond_ico.jpg")));
+        } catch (IOException ie) {
+            ie.printStackTrace();
+        }
+
 
         ResultSet modelSet = main.db.select("*","workers","","","");
 
